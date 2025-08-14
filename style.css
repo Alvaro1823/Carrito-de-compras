@@ -1,0 +1,60 @@
+/* Estilos generales y de tipografía si no se usa la predeterminada de Bootstrap */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa; /* Color de fondo muy claro */
+}
+
+/* Ajustes para las secciones del main */
+section {
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 0.5rem; /* Bordes redondeados */
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Sombra suave */
+}
+
+/* Ajustes para las tarjetas de producto */
+.producto-card {
+    border: 1px solid #e0e0e0; 
+    border-radius: 0.4rem;
+    padding: 15px;
+    text-align: center;
+    background-color: #fdfdfd;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    display: flex; /* Para centrar contenido si es necesario */
+    flex-direction: column;
+    justify-content: space-between; /* Empuja el botón hacia abajo */
+}
+
+.producto-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1); /* Sombra más pronunciada al pasar el ratón */
+}
+
+.producto-card h3 {
+    font-size: 1.25rem; /* Tamaño de fuente ligeramente más pequeño */
+    margin-bottom: 0.5rem;
+    color: #343a40; /* Color de texto más oscuro */
+}
+
+.producto-card p {
+    font-size: 1.1rem;
+    color: #007bff; /* Color del precio */
+    font-weight: 600; /* Un poco más de peso para el precio */
+    margin-bottom: 1rem;
+}
+
+/* Mensaje de carrito vacío */
+.carrito-vacio-mensaje {
+    color: #6c757d !important; /* Texto gris de Bootstrap */
+    font-style: italic;
+    padding: 15px !important;
+}
+
+/* Estilo para los ítems del carrito */
+.list-group-item span:first-child {
+    font-weight: 500;
+}
+.list-group-item span:last-child {
+    font-weight: 600;
+    color: #28a745; /* Color verde para subtotales */
+}
