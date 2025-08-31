@@ -1,4 +1,4 @@
-// 1. Definición de los productos disponibles en la tienda con stock
+// Productos
 const productos = [
     { id: 1, nombre: 'Audífonos Bluetooth Premium', precio: 79.99, stock: 10, imagen: 'img/audifonos.jpg' },
     { id: 2, nombre: 'Bocina Portátil Sumergible', precio: 129.50, stock: 3, imagen: 'img/bocina.jpg' },
@@ -9,22 +9,21 @@ const productos = [
     { id: 7, nombre: 'Webcam Full HD 1080p', precio: 59.99, stock: 9, imagen: 'img/webcam.jpg' }
 ];
 
-let carrito = []; 
+let carrito = [];
 
-// Referencias a los elementos del DOM
-const productosGridDiv = document.getElementById('productos-grid'); 
+// DOM
+const productosGridDiv = document.getElementById('productos-grid');
 const listaCarritoUl = document.getElementById('lista-carrito');
 const totalCarritoSpan = document.getElementById('total-carrito');
 const vaciarCarritoBtn = document.getElementById('vaciar-carrito');
 
-// Mostrar productos con imágenes, stock y campo de cantidad
+// Mostrar productos
 function mostrarProductos() {
-    productosGridDiv.innerHTML = ''; 
-
+    productosGridDiv.innerHTML = '';
     productos.forEach(producto => {
-        const productoCardCol = document.createElement('div');
-        productoCardCol.classList.add('col', 'mb-4'); 
-        
+        const col = document.createElement('div');
+        col.classList.add('col', 'mb-4');
+
         let controles = '';
         if (producto.stock > 0) {
             controles = `
@@ -36,7 +35,7 @@ function mostrarProductos() {
             controles = `<p class="text-danger fw-bold mt-auto">AGOTADO</p>`;
         }
 
-        productoCardCol.innerHTML = `
+        col.innerHTML = `
             <div class="card h-100 producto-card">
                 <img src="${producto.imagen}" class="card-img-top" alt="${producto.nombre}">
                 <div class="card-body d-flex flex-column">
@@ -46,50 +45,45 @@ function mostrarProductos() {
                 </div>
             </div>
         `;
-        productosGridDiv.appendChild(productoCardCol);
-    });
 
-    productosGridDiv.addEventListener('click', (event) => {
-        if (event.target.classList.contains('agregar-carrito')) {
-            agregarProductoAlCarrito(event);
-        }
+        productosGridDiv.appendChild(col);
     });
 }
 
-// Agregar producto con validación y actualización de stock
+// Delegación de eventos para agregar al carrito
+document.addEventListener('click', e => {
+    if (e.target.classList.contains('agregar-carrito')) {
+        agregarProductoAlCarrito(e);
+    }
+});
+
+// Agregar al carrito
 function agregarProductoAlCarrito(event) {
-    const idProducto = parseInt(event.target.dataset.id); 
-    const cantidadInput = document.querySelector(`.cantidad-input[data-id="${idProducto}"]`);
-    let cantidad = parseInt(cantidadInput.value);
+    const id = parseInt(event.target.dataset.id);
+    const input = document.querySelector(`.cantidad-input[data-id="${id}"]`);
+    let cantidad = parseInt(input.value) || 1;
 
-    if (cantidad < 1 || isNaN(cantidad)) cantidad = 1;
-
-    const productoSeleccionado = productos.find(p => p.id === idProducto);
-    if (!productoSeleccionado) return;
-
-    if (cantidad > productoSeleccionado.stock) {
-        alert(`No puedes agregar más de ${productoSeleccionado.stock} unidades disponibles.`);
+    const prod = productos.find(p => p.id === id);
+    if (cantidad > prod.stock) {
+        Swal.fire('Error', `No puedes agregar más de ${prod.stock} unidades.`, 'error');
         return;
     }
 
-    // Reducir el stock real del producto
-    productoSeleccionado.stock -= cantidad;
+    // Evita stock negativo
+    prod.stock = Math.max(0, prod.stock - cantidad);
 
-    const enCarrito = carrito.find(item => item.id === idProducto);
-    if (enCarrito) {
-        enCarrito.cantidad += cantidad;
-    } else {
-        carrito.push({ ...productoSeleccionado, cantidad });
-    }
+    const enCarrito = carrito.find(item => item.id === id);
+    if (enCarrito) enCarrito.cantidad += cantidad;
+    else carrito.push({ ...prod, cantidad });
 
     actualizarCarrito();
-    mostrarProductos(); // Recargar la vista para mostrar "AGOTADO" si stock = 0
+    mostrarProductos();
 }
 
-// Mostrar carrito con stock
+// Actualizar carrito (con IVA)
 function actualizarCarrito() {
     listaCarritoUl.innerHTML = '';
-    let total = 0;
+    let subtotal = 0;
 
     if (carrito.length === 0) {
         const li = document.createElement('li');
@@ -97,62 +91,64 @@ function actualizarCarrito() {
         li.textContent = 'Tu carrito está vacío. ¡Añade algunos productos!';
         listaCarritoUl.appendChild(li);
     } else {
-        carrito.forEach(producto => {
+        carrito.forEach(prod => {
+            const prodOriginal = productos.find(p => p.id === prod.id);
+
             const li = document.createElement('li');
             li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
             li.innerHTML = `
                 <div>
-                    <strong>${producto.nombre}</strong>  
-                    <br>Precio unitario: $${producto.precio.toFixed(2)}
-                    <br>Stock restante: ${producto.stock}
-                    <br>Cantidad en carrito: ${producto.cantidad}
+                    <strong>${prod.nombre}</strong><br>
+                    Precio unitario: $${prod.precio.toFixed(2)}<br>
+                    Stock restante: ${prodOriginal.stock}<br>
+                    Cantidad en carrito: ${prod.cantidad}
                 </div>
                 <div class="text-end">
-                    <span class="badge bg-primary rounded-pill mb-1">$${(producto.precio * producto.cantidad).toFixed(2)}</span>
-                    <br>
-                    <button class="btn btn-sm btn-danger eliminar-producto" data-id="${producto.id}">Eliminar</button>
+                    <span class="badge bg-primary rounded-pill mb-1">$${(prod.precio * prod.cantidad).toFixed(2)}</span><br>
+                    <button class="btn btn-sm btn-danger eliminar-producto" data-id="${prod.id}">Eliminar</button>
                 </div>
             `;
             listaCarritoUl.appendChild(li);
-            total += producto.precio * producto.cantidad;
+            subtotal += prod.precio * prod.cantidad;
         });
     }
-    totalCarritoSpan.textContent = total.toFixed(2);
+
+    const iva = subtotal * 0.13;
+    const totalConIVA = subtotal + iva;
+
+    document.getElementById('subtotal-carrito').textContent = subtotal.toFixed(2);
+    document.getElementById('iva-carrito').textContent = iva.toFixed(2);
+    totalCarritoSpan.textContent = totalConIVA.toFixed(2);
 
     document.querySelectorAll('.eliminar-producto').forEach(btn => {
         btn.addEventListener('click', eliminarProducto);
     });
 }
 
-// Eliminar producto del carrito y devolver stock
-function eliminarProducto(event) {
-    const idProducto = parseInt(event.target.dataset.id);
-    const productoEnCarrito = carrito.find(item => item.id === idProducto);
-
-    if (productoEnCarrito) {
-        // Devolver el stock al producto original
-        const productoOriginal = productos.find(p => p.id === idProducto);
-        productoOriginal.stock += productoEnCarrito.cantidad;
+// Eliminar producto
+function eliminarProducto(e) {
+    const id = parseInt(e.target.dataset.id);
+    const prodCarrito = carrito.find(item => item.id === id);
+    if (prodCarrito) {
+        const prodOriginal = productos.find(p => p.id === id);
+        prodOriginal.stock += prodCarrito.cantidad;
     }
-
-    carrito = carrito.filter(item => item.id !== idProducto);
+    carrito = carrito.filter(item => item.id !== id);
     actualizarCarrito();
-    mostrarProductos(); // Actualizar la vista
+    mostrarProductos();
 }
 
-// Vaciar carrito y devolver stock
+// Vaciar carrito
 function vaciarCarrito() {
     carrito.forEach(item => {
-        const productoOriginal = productos.find(p => p.id === item.id);
-        productoOriginal.stock += item.cantidad;
+        const prodOriginal = productos.find(p => p.id === item.id);
+        prodOriginal.stock += item.cantidad;
     });
     carrito = [];
     actualizarCarrito();
     mostrarProductos();
 }
-
-// Eventos
-vaciarCarritoBtn.addEventListener('click', vaciarCarrito);
+document.getElementById('vaciar-carrito').addEventListener('click', vaciarCarrito);
 
 // Inicializar
 document.addEventListener('DOMContentLoaded', () => {
@@ -160,84 +156,3 @@ document.addEventListener('DOMContentLoaded', () => {
     actualizarCarrito();
 });
 
-
-
-// Botón para confirmar la compra
-const confirmarCompraBtn = document.getElementById('confirmar-compra');
-
-// Tasa de impuesto (IVA)
-const IVA = 0.13;
-
-/**
- * Función para confirmar la compra y mostrar la factura.
- */
-function confirmarCompra() {
-    if (carrito.length === 0) {
-       Swal.fire({
-  icon: 'info',
-  title: '¡Tu carrito está vacío!',
-  text: 'Añade algunos productos para continuar.',
-});
-        return;
-    }
-
-    let subtotal = 0;
-    let facturaHTML = `
-        <h3>Factura de Compra</h3>
-        <table class="table table-bordered table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>Producto</th>
-                    <th>Cantidad</th>
-                    <th>Precio Unitario</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
-
-    carrito.forEach(producto => {
-        const totalProducto = producto.precio * producto.cantidad;
-        subtotal += totalProducto;
-        facturaHTML += `
-            <tr>
-                <td>${producto.nombre}</td>
-                <td>${producto.cantidad}</td>
-                <td>$${producto.precio.toFixed(2)}</td>
-                <td>$${totalProducto.toFixed(2)}</td>
-            </tr>
-        `;
-    });
-
-    const impuesto = subtotal * IVA;
-    const totalGeneral = subtotal + impuesto;
-
-    facturaHTML += `
-            </tbody>
-        </table>
-        <p><strong>Subtotal:</strong> $${subtotal.toFixed(2)}</p>
-        <p><strong>IVA (13%):</strong> $${impuesto.toFixed(2)}</p>
-        <p><strong>Total a Pagar:</strong> $${totalGeneral.toFixed(2)}</p>
-    `;
-
-    // Mostrar factura en un modal o contenedor en pantalla
-    const facturaDiv = document.getElementById('factura');
-    facturaDiv.innerHTML = facturaHTML;
-    facturaDiv.style.display = 'block';
-
-    // Actualizar inventario restando las cantidades compradas
-    carrito.forEach(item => {
-        const productoTienda = productos.find(p => p.id === item.id);
-        if (productoTienda) {
-            productoTienda.stock -= item.cantidad;
-        }
-    });
-
-    // Vaciar el carrito
-    carrito = [];
-    actualizarCarrito();
-    mostrarProductos();
-}
-
-// Asociar evento al botón
-confirmarCompraBtn.addEventListener('click', confirmarCompra);
