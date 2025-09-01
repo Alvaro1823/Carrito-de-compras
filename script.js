@@ -16,6 +16,10 @@ const productosGridDiv = document.getElementById('productos-grid');
 const listaCarritoUl = document.getElementById('lista-carrito');
 const totalCarritoSpan = document.getElementById('total-carrito');
 const vaciarCarritoBtn = document.getElementById('vaciar-carrito');
+const confirmarCompraBtn = document.getElementById('confirmar-compra');
+
+// Tasa de impuesto (IVA)
+const IVA = 0.13;
 
 // Mostrar productos con imágenes, stock y campo de cantidad
 function mostrarProductos() {
@@ -48,12 +52,6 @@ function mostrarProductos() {
         `;
         productosGridDiv.appendChild(productoCardCol);
     });
-
-    productosGridDiv.addEventListener('click', (event) => {
-        if (event.target.classList.contains('agregar-carrito')) {
-            agregarProductoAlCarrito(event);
-        }
-    });
 }
 
 // Agregar producto con validación y actualización de stock
@@ -79,14 +77,19 @@ function agregarProductoAlCarrito(event) {
     if (enCarrito) {
         enCarrito.cantidad += cantidad;
     } else {
-        carrito.push({ ...productoSeleccionado, cantidad });
+        carrito.push({
+            id: productoSeleccionado.id,
+            nombre: productoSeleccionado.nombre,
+            precio: productoSeleccionado.precio,
+            cantidad
+        });
     }
 
     actualizarCarrito();
     mostrarProductos(); // Recargar la vista para mostrar "AGOTADO" si stock = 0
 }
 
-// Mostrar carrito con stock
+// Mostrar carrito
 function actualizarCarrito() {
     listaCarritoUl.innerHTML = '';
     let total = 0;
@@ -97,24 +100,27 @@ function actualizarCarrito() {
         li.textContent = 'Tu carrito está vacío. ¡Añade algunos productos!';
         listaCarritoUl.appendChild(li);
     } else {
-        carrito.forEach(producto => {
+        carrito.forEach(item => {
+            const productoOriginal = productos.find(p => p.id === item.id);
+            const stockRestante = productoOriginal ? productoOriginal.stock : 0;
+
             const li = document.createElement('li');
             li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
             li.innerHTML = `
                 <div>
-                    <strong>${producto.nombre}</strong>  
-                    <br>Precio unitario: $${producto.precio.toFixed(2)}
-                    <br>Stock restante: ${producto.stock}
-                    <br>Cantidad en carrito: ${producto.cantidad}
+                    <strong>${item.nombre}</strong>  
+                    <br>Precio unitario: $${item.precio.toFixed(2)}
+                    <br>Stock restante: ${stockRestante}
+                    <br>Cantidad en carrito: ${item.cantidad}
                 </div>
                 <div class="text-end">
-                    <span class="badge bg-primary rounded-pill mb-1">$${(producto.precio * producto.cantidad).toFixed(2)}</span>
+                    <span class="badge bg-primary rounded-pill mb-1">$${(item.precio * item.cantidad).toFixed(2)}</span>
                     <br>
-                    <button class="btn btn-sm btn-danger eliminar-producto" data-id="${producto.id}">Eliminar</button>
+                    <button class="btn btn-sm btn-danger eliminar-producto" data-id="${item.id}">Eliminar</button>
                 </div>
             `;
             listaCarritoUl.appendChild(li);
-            total += producto.precio * producto.cantidad;
+            total += item.precio * item.cantidad;
         });
     }
     totalCarritoSpan.textContent = total.toFixed(2);
@@ -130,54 +136,39 @@ function eliminarProducto(event) {
     const productoEnCarrito = carrito.find(item => item.id === idProducto);
 
     if (productoEnCarrito) {
-        // Devolver el stock al producto original
+        // Devolver stock al producto original
         const productoOriginal = productos.find(p => p.id === idProducto);
-        productoOriginal.stock += productoEnCarrito.cantidad;
+        if (productoOriginal) {
+            productoOriginal.stock += productoEnCarrito.cantidad;
+        }
     }
 
     carrito = carrito.filter(item => item.id !== idProducto);
     actualizarCarrito();
-    mostrarProductos(); // Actualizar la vista
+    mostrarProductos();
 }
 
 // Vaciar carrito y devolver stock
 function vaciarCarrito() {
     carrito.forEach(item => {
         const productoOriginal = productos.find(p => p.id === item.id);
-        productoOriginal.stock += item.cantidad;
+        if (productoOriginal) {
+            productoOriginal.stock += item.cantidad;
+        }
     });
     carrito = [];
     actualizarCarrito();
     mostrarProductos();
 }
 
-// Eventos
-vaciarCarritoBtn.addEventListener('click', vaciarCarrito);
-
-// Inicializar
-document.addEventListener('DOMContentLoaded', () => {
-    mostrarProductos();
-    actualizarCarrito();
-});
-
-
-
-// Botón para confirmar la compra
-const confirmarCompraBtn = document.getElementById('confirmar-compra');
-
-// Tasa de impuesto (IVA)
-const IVA = 0.13;
-
-/**
- * Función para confirmar la compra y mostrar la factura.
- */
+// Confirmar compra
 function confirmarCompra() {
     if (carrito.length === 0) {
-       Swal.fire({
-  icon: 'info',
-  title: '¡Tu carrito está vacío!',
-  text: 'Añade algunos productos para continuar.',
-});
+        Swal.fire({
+            icon: 'info',
+            title: '¡Tu carrito está vacío!',
+            text: 'Añade algunos productos para continuar.',
+        });
         return;
     }
 
@@ -196,14 +187,14 @@ function confirmarCompra() {
             <tbody>
     `;
 
-    carrito.forEach(producto => {
-        const totalProducto = producto.precio * producto.cantidad;
+    carrito.forEach(item => {
+        const totalProducto = item.precio * item.cantidad;
         subtotal += totalProducto;
         facturaHTML += `
             <tr>
-                <td>${producto.nombre}</td>
-                <td>${producto.cantidad}</td>
-                <td>$${producto.precio.toFixed(2)}</td>
+                <td>${item.nombre}</td>
+                <td>${item.cantidad}</td>
+                <td>$${item.precio.toFixed(2)}</td>
                 <td>$${totalProducto.toFixed(2)}</td>
             </tr>
         `;
@@ -220,24 +211,29 @@ function confirmarCompra() {
         <p><strong>Total a Pagar:</strong> $${totalGeneral.toFixed(2)}</p>
     `;
 
-    // Mostrar factura en un modal o contenedor en pantalla
     const facturaDiv = document.getElementById('factura');
     facturaDiv.innerHTML = facturaHTML;
     facturaDiv.style.display = 'block';
 
-    // Actualizar inventario restando las cantidades compradas
-    carrito.forEach(item => {
-        const productoTienda = productos.find(p => p.id === item.id);
-        if (productoTienda) {
-            productoTienda.stock -= item.cantidad;
-        }
-    });
-
-    // Vaciar el carrito
+    // Vaciar carrito (el stock ya se descuenta en agregarProductoAlCarrito)
     carrito = [];
     actualizarCarrito();
     mostrarProductos();
 }
 
-// Asociar evento al botón
+// Eventos
+vaciarCarritoBtn.addEventListener('click', vaciarCarrito);
 confirmarCompraBtn.addEventListener('click', confirmarCompra);
+
+// Delegación de eventos para agregar productos
+productosGridDiv.addEventListener('click', (event) => {
+    if (event.target.classList.contains('agregar-carrito')) {
+        agregarProductoAlCarrito(event);
+    }
+});
+
+// Inicializar
+document.addEventListener('DOMContentLoaded', () => {
+    mostrarProductos();
+    actualizarCarrito();
+});
