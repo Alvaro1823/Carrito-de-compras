@@ -9,23 +9,19 @@
     <style>
         body {
             background: linear-gradient(135deg, #ff416c, #67ff2b);
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: start;
-            padding-top: 50px;
+            justify-content: center;
         }
         .card {
             border-radius: 15px;
             box-shadow: 0px 5px 20px rgba(0,0,0,0.2);
-            margin-bottom: 40px;
         }
     </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div class="card p-4" style="width: 350px;">
     <h4 class="text-center mb-3">Iniciar Sesión</h4>
     <input type="text" id="usuario" class="form-control mb-2" placeholder="Usuario">
@@ -34,29 +30,8 @@
     <a href="nuevo.html" class="btn btn-link w-100 mt-2">Crear una cuenta nueva</a>
 </div>
 
-<!-- TIENDA -->
-<main class="container">
-    <div class="row">
-        <section id="productos" class="col-lg-8 mb-4">
-            <h2 class="mb-4 text-primary">Nuestros Productos</h2>
-            <div id="productos-grid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4"></div>
-        </section>
-
-        <section id="carrito" class="col-lg-4 mb-4">
-            <h2 class="mb-4 text-primary">Tu Carrito</h2>
-            <ul id="lista-carrito" class="list-group mb-3">
-                <li class="list-group-item text-muted text-center carrito-vacio-mensaje">Tu carrito está vacío. ¡Añade algunos productos!</li>
-            </ul>
-            <p class="h4 text-end">Total: $<span id="total-carrito">0.00</span></p>
-            <button id="vaciar-carrito" class="btn btn-danger w-100 mb-3">Vaciar Carrito</button>
-            <button id="confirmar-compra" class="btn btn-primary w-100">Confirmar Compra</button>
-        </section>
-    </div>
-</main>
-
-<div id="factura" class="mt-4" style="display: none;"></div>
-
 <script>
+    // Agregamos un evento para el Enter
     document.getElementById("clave").addEventListener("keyup", function(event) {
         if (event.key === "Enter") {
             login();
