@@ -1,0 +1,107 @@
+/* Ajustes para las tarjetas de producto */
+.producto-card {
+    height: 100%;
+    border: 1px solid #e0e0e0;
+    border-radius: 0.4rem;
+    padding: 15px;
+    text-align: center;
+    background-color: #fdfdfd;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+}
+
+.producto-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+/* Contenedor de imagen de altura fija */
+.imagen-producto-container {
+    height: 150px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+/* Estilo para la imagen dentro del contenedor */
+.card-img-top {
+    max-height: 100%;
+    width: auto;
+    object-fit: contain;
+}
+
+/* --- CAMBIO CLAVE AQUÍ --- */
+/* Nuevo contenedor para todo el texto y controles */
+.card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+    padding: 1rem 0.5rem; /* Ajusta el padding para dar espacio a los lados */
+}
+
+/* Fija la altura del título para que no se mueva */
+.card-title {
+    font-size: 1.25rem;
+    min-height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+}
+
+.card-text {
+    font-size: 1.1rem;
+    color: #007bff;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.text-muted {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
+.input-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.agregar-carrito {
+    margin-top: auto;
+}
+
+/* Mensaje de carrito vacío */
+.carrito-vacio-mensaje {
+    color: #6c757d !important;
+    font-style: italic;
+    padding: 15px !important;
+}
+
+/* Estilo para los ítems del carrito */
+.list-group-item strong {
+    font-weight: 500;
+}
+.list-group-item .badge {
+    font-weight: 600;
+    color: #28a745;
+}
+
+.badge {
+    background-color: #0d6efd; /* Color de fondo de Bootstrap */
+    color: white; /* Color del texto */
+}
+
+/* Puedes sobrescribir el estilo para que se adapte mejor a tus necesidades */
+.list-group-item .badge {
+    background-color: #343a40; /* Un gris oscuro, más neutro */
+    color: #ffffff; /* Texto blanco */
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+}
